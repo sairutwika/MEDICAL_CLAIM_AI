@@ -11,18 +11,14 @@ from app.ml.fraud import detect_fraud
 from app.schemas import ClaimRequest
 
 app = FastAPI()
-
-# Template configuration
 templates = Jinja2Templates(directory="app/templates")
 
 
-# ---------------- STARTUP EVENT ----------------
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(bind=engine)
 
 
-# ---------------- LOGGING ----------------
 logging.basicConfig(
     filename="app.log",
     level=logging.INFO,
@@ -30,13 +26,10 @@ logging.basicConfig(
 )
 
 
-# ---------------- HOME (HTML FRONTEND) ----------------
+# ---------------- DASHBOARD PAGE ----------------
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
+def dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 # ---------------- CREATE USER ----------------
@@ -58,11 +51,14 @@ def create_user(username: str, role: str = "user"):
         db.close()
 
 
-# ---------------- PREDICT ----------------
+# ---------------- PREDICT CLAIM ----------------
 @app.post("/predict")
 def predict(claim: ClaimRequest):
     db: Session = SessionLocal()
     try:
+        if not claim.user_id:
+            raise HTTPException(status_code=400, detail="Insufficient data to evaluate this claim.")
+
         user = db.query(User).filter(User.id == claim.user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -72,14 +68,7 @@ def predict(claim: ClaimRequest):
         prediction, confidence = predict_claim(claim_data)
         fraud_risk = detect_fraud(claim_data)
 
-        explanation = "Prediction based on claim amount and previous claim frequency."
-
-        result = {
-            "claim_status": prediction,
-            "fraud_risk": fraud_risk,
-            "confidence_score": round(confidence, 2),
-            "explanation": explanation
-        }
+        explanation = "Claim evaluated based on coverage ratio and claim history."
 
         db_claim = Claim(
             user_id=claim.user_id,
@@ -92,16 +81,20 @@ def predict(claim: ClaimRequest):
         db.add(db_claim)
         db.commit()
 
-        logging.info(f"User {claim.user_id} submitted claim")
+        return {
+            "claim_status": prediction,
+            "fraud_risk": fraud_risk,
+            "confidence_score": round(confidence, 2),
+            "explanation": explanation
+        }
 
-        return result
     finally:
         db.close()
 
 
 # ---------------- USER HISTORY ----------------
 @app.get("/history/{user_id}")
-def get_user_history(user_id: int):
+def history(user_id: int):
     db = SessionLocal()
     try:
         claims = db.query(Claim).filter(Claim.user_id == user_id).all()
@@ -110,9 +103,9 @@ def get_user_history(user_id: int):
         db.close()
 
 
-# ---------------- ADMIN ALL CLAIMS ----------------
-@app.get("/admin/all_claims")
-def get_all_claims(user_id: int):
+# ---------------- ADMIN DASHBOARD ----------------
+@app.get("/admin/{user_id}")
+def admin_dashboard(user_id: int):
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -120,6 +113,13 @@ def get_all_claims(user_id: int):
             raise HTTPException(status_code=403, detail="Access denied")
 
         claims = db.query(Claim).all()
-        return claims
+
+        return {
+            "total_claims": len(claims),
+            "approved": len([c for c in claims if c.claim_status == "Approved"]),
+            "rejected": len([c for c in claims if c.claim_status == "Rejected"]),
+            "manual": len([c for c in claims if c.claim_status == "Manual Review"])
+        }
+
     finally:
         db.close()
