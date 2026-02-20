@@ -1,0 +1,21 @@
+patient_age,gender,diagnosis_code,procedure_code,claim_amount,policy_coverage_amount,hospital_type,admission_type,previous_claim_count,claim_status
+45,Male,D1,P1,120000,200000,Private,Planned,1,Approved
+60,Female,D2,P2,450000,300000,Private,Emergency,4,Rejected
+35,Male,D3,P3,80000,150000,Government,Planned,0,Approved
+50,Female,D4,P1,250000,200000,Private,Emergency,5,Rejected
+28,Female,D2,P2,90000,120000,Government,Planned,2,Approved
+70,Male,D1,P3,400000,350000,Private,Emergency,4,Rejected
+40,Male,D3,P2,180000,250000,Government,Planned,3,Approved
+55,Female,D4,P1,300000,300000,Private,Emergency,4,Manual Review
+33,Male,D2,P3,150000,200000,Government,Planned,4,Manual Review
+48,Female,D1,P2,220000,250000,Private,Planned,1,Approved
+62,Male,D3,P1,380000,350000,Private,Emergency,5,Rejected
+29,Female,D2,P3,100000,180000,Government,Planned,0,Approved
+52,Male,D4,P2,270000,250000,Private,Emergency,3,Manual Review
+47,Female,D1,P1,200000,200000,Government,Planned,2,Approved
+39,Male,D3,P3,140000,150000,Private,Emergency,4,Manual Review
+58,Female,D2,P2,320000,280000,Private,Emergency,5,Rejected
+31,Male,D4,P1,110000,200000,Government,Planned,1,Approved
+65,Female,D1,P3,420000,350000,Private,Emergency,4,Rejected
+42,Male,D2,P2,190000,250000,Government,Planned,3,Approved
+36,Female,D3,P1,160000,200000,Private,Planned,4,Manual Review
