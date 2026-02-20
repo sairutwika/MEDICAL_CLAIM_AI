@@ -85,9 +85,17 @@ medical_claim_ai/
 │ │ │ ├── predict.py
 │ │ │ ├── fraud.py
 │ │ │ ├── explain.py
-│ │
-├── frontend/
-│ ├── streamlit_app.py
-│
-├── requirements.txt
-├── README.md
+    |_templates /
+          _index.html     
+
+---
+
+## ⚙️ How to Run Locally
+
+### 1️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+cd backend/app
+python -m uvicorn main:app --reload --port 9000
+streamlit run frontend/streamlit_app.py

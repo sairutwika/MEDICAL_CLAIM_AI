@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <title>AI Medical Claim Processor</title>
+  </head>
+  <body style="background: black; color: white; font-family: sans-serif">
+    <h1>🏥 AI Medical Claim Processor</h1>
+
+    <form id="claimForm">
+      <input
+        type="number"
+        name="user_id"
+        placeholder="User ID"
+        required
+      /><br /><br />
+      <input
+        type="number"
+        name="patient_age"
+        placeholder="Patient Age"
+      /><br /><br />
+      <input type="text" name="gender" placeholder="Gender" /><br /><br />
+      <input
+        type="number"
+        name="claim_amount"
+        placeholder="Claim Amount"
+      /><br /><br />
+      <button type="submit">Evaluate</button>
+    </form>
+
+    <pre id="result"></pre>
+
+    <script>
+      document.getElementById("claimForm").onsubmit = async function (e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        document.getElementById("result").innerText = JSON.stringify(
+          result,
+          null,
+          2,
+        );
+      };
+    </script>
+  </body>
+</html>

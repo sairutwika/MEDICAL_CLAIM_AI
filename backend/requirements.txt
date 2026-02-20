@@ -9,3 +9,4 @@ psycopg2-binary
 shap
 python-multipart
 pydantic
+jinja2
