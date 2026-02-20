@@ -2,11 +2,11 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy.orm import Session
 import logging
 
-from database import engine, Base, SessionLocal
-from models import User, Claim
-from ml.predict import predict_claim
-from ml.fraud import detect_fraud
-from schemas import ClaimRequest
+from app.database import engine, Base, SessionLocal
+from app.models import User, Claim
+from app.ml.predict import predict_claim
+from app.ml.fraud import detect_fraud
+from app.schemas import ClaimRequest
 
 app = FastAPI()
 
