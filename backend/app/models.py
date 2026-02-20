@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
-from database import Base
+from app.database import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -10,6 +11,7 @@ class User(Base):
     role = Column(String, default="user")
 
     claims = relationship("Claim", back_populates="user")
+
 
 class Claim(Base):
     __tablename__ = "claims"
