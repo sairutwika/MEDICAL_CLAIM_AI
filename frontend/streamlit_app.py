@@ -1,6 +1,9 @@
 import streamlit as st
 import requests
 
+# 🔥 Your Live Backend API URL
+API_BASE_URL = "https://medical-claim-ai.onrender.com"
+
 st.set_page_config(
     page_title="AI Medical Claim Processor",
     page_icon="🏥",
@@ -11,17 +14,17 @@ st.set_page_config(
 st.markdown("""
 <style>
 .result-card {
-    background-color: black;
+    background-color: #111;
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0px 4px 15px rgba(0,0,0,0.08);
 }
-.approved {color: green; font-weight: bold;}
-.rejected {color: red; font-weight: bold;}
+.approved {color: #00ff88; font-weight: bold;}
+.rejected {color: #ff4b4b; font-weight: bold;}
 .manual {color: orange; font-weight: bold;}
-.low {color: green;}
+.low {color: #00ff88;}
 .medium {color: orange;}
-.high {color: red;}
+.high {color: #ff4b4b;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -61,7 +64,7 @@ st.markdown("---")
 if st.button("🚀 Evaluate Claim", use_container_width=True):
 
     payload = {
-        "user_id": user_id,   # 🔥 THIS WAS MISSING
+        "user_id": user_id,
         "patient_age": patient_age,
         "gender": gender,
         "diagnosis_code": diagnosis_code,
@@ -75,17 +78,13 @@ if st.button("🚀 Evaluate Claim", use_container_width=True):
 
     try:
         response = requests.post(
-    "http://localhost:9000/predict",
-    json=payload
-)
-        
+            f"{API_BASE_URL}/predict",
+            json=payload,
+            timeout=30
+        )
 
         if response.status_code == 200:
             result = response.json()
-
-            if "claim_status" not in result:
-                st.error(result.get("message", "Unknown Error"))
-                st.stop()
 
             status = result["claim_status"]
             fraud = result["fraud_risk"]
