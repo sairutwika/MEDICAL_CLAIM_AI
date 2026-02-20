@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import logging
 
@@ -9,6 +11,9 @@ from app.ml.fraud import detect_fraud
 from app.schemas import ClaimRequest
 
 app = FastAPI()
+
+# Template configuration
+templates = Jinja2Templates(directory="app/templates")
 
 
 # ---------------- STARTUP EVENT ----------------
@@ -25,17 +30,19 @@ logging.basicConfig(
 )
 
 
-# ---------------- HOME ----------------
-@app.get("/")
-def home():
-    return {"message": "Medical Claim API Running"}
+# ---------------- HOME (HTML FRONTEND) ----------------
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
 
 
 # ---------------- CREATE USER ----------------
 @app.post("/create_user/{username}")
 def create_user(username: str, role: str = "user"):
     db: Session = SessionLocal()
-
     try:
         existing = db.query(User).filter(User.username == username).first()
         if existing:
@@ -47,7 +54,6 @@ def create_user(username: str, role: str = "user"):
         db.refresh(new_user)
 
         return {"message": "User created", "user_id": new_user.id}
-
     finally:
         db.close()
 
@@ -56,7 +62,6 @@ def create_user(username: str, role: str = "user"):
 @app.post("/predict")
 def predict(claim: ClaimRequest):
     db: Session = SessionLocal()
-
     try:
         user = db.query(User).filter(User.id == claim.user_id).first()
         if not user:
@@ -67,9 +72,7 @@ def predict(claim: ClaimRequest):
         prediction, confidence = predict_claim(claim_data)
         fraud_risk = detect_fraud(claim_data)
 
-        explanation = (
-            "Prediction based on claim amount and previous claim frequency."
-        )
+        explanation = "Prediction based on claim amount and previous claim frequency."
 
         result = {
             "claim_status": prediction,
@@ -92,7 +95,6 @@ def predict(claim: ClaimRequest):
         logging.info(f"User {claim.user_id} submitted claim")
 
         return result
-
     finally:
         db.close()
 
@@ -112,7 +114,6 @@ def get_user_history(user_id: int):
 @app.get("/admin/all_claims")
 def get_all_claims(user_id: int):
     db = SessionLocal()
-
     try:
         user = db.query(User).filter(User.id == user_id).first()
         if not user or user.role != "admin":
@@ -120,6 +121,5 @@ def get_all_claims(user_id: int):
 
         claims = db.query(Claim).all()
         return claims
-
     finally:
         db.close()
